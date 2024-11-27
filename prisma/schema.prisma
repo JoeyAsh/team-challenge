@@ -21,7 +21,7 @@ enum AccountStatus {
 
 enum UserRole {
   ADMIN
-  OWNER
+  PLAYER
   USER
 }
 
@@ -59,6 +59,7 @@ model Challenge {
   modifiedAt          DateTime              @updatedAt
   games               Game[]
   challengeTimeStamps ChallengeTimeStamps[]
+  teams               Team[]
 }
 
 model ChallengeTimeStamps {
@@ -70,15 +71,15 @@ model ChallengeTimeStamps {
 }
 
 model User {
-  id             String        @id @default(uuid())
-  email          String        @unique
-  name           String?       @unique
-  role           UserRole      @default(USER)
-  accountStatus  AccountStatus @default(PENDING)
+  id             String         @id @default(uuid())
+  email          String         @unique
+  name           String?        @unique
+  role           UserRole?      @default(USER)
+  accountStatus  AccountStatus? @default(PENDING)
   channel        String?
   imageSrc       String?
-  receivingDepts Dept[]        @relation("ReceivingDepts")
-  sendingDepts   Dept[]        @relation("SendingDepts")
+  receivingDepts Dept[]         @relation("ReceivingDepts")
+  sendingDepts   Dept[]         @relation("SendingDepts")
   registration   Registration?
 }
 
@@ -92,6 +93,15 @@ model Game {
   priceId    String?     @unique
 }
 
+model Team {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  createdAt   DateTime  @default(now())
+  modifiedAt  DateTime  @updatedAt
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challengeId String    @unique
+}
+
 model Price {
   id     String      @id @default(uuid())
   price  Float
@@ -100,12 +110,12 @@ model Price {
 }
 
 model Registration {
-  id         String             @id @default(uuid())
-  user       User               @relation(fields: [userId], references: [id])
-  userId     String             @unique
-  status     RegistrationStatus
-  createdAt  DateTime           @default(now())
-  modifiedAt DateTime           @updatedAt
+  id         String              @id @default(uuid())
+  user       User                @relation(fields: [userId], references: [id])
+  userId     String              @unique
+  status     RegistrationStatus? @default(PENDING)
+  createdAt  DateTime            @default(now())
+  modifiedAt DateTime            @updatedAt
 }
 
 model Dept {
